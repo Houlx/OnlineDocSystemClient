@@ -1,0 +1,18 @@
+@import '~antd/dist/antd.css';
+
+.login-container {
+  max-width: 420px;
+  margin: 0 auto;
+  margin: 0 auto;
+  margin-top: 40px;
+}
+
+.login-form {
+  max-width: 300px;
+}
+.login-form-forgot {
+  float: right;
+}
+.login-form-button {
+  width: 100%;
+}
