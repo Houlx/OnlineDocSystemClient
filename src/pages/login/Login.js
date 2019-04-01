@@ -18,6 +18,8 @@ class NormalLoginForm extends React.Component {
           if (res.status === 200) {
             localStorage.setItem(ACCESS_TOKEN, res.data.accessToken)
             this.props.onLogin()
+            console.log(this.props)
+            this.props.history.push('/')
           }
         }).catch(err => {
           if (err.response.status === 401) {
@@ -41,19 +43,20 @@ class NormalLoginForm extends React.Component {
 
     return (
       <div className="login-container">
+        <h1 className="page-title">Login</h1>
         <Form onSubmit={this.handleSubmit} className="login-form">
           <Form.Item>
             {getFieldDecorator('usernameOrEmail', {
               rules: [{ required: true, message: 'Please input your username!' }],
             })(
-              <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
+              <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" size='large' />
             )}
           </Form.Item>
           <Form.Item>
             {getFieldDecorator('password', {
               rules: [{ required: true, message: 'Please input your Password!' }],
             })(
-              <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+              <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" size='large' placeholder="Password" />
             )}
           </Form.Item>
           <Form.Item>

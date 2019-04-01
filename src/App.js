@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
 import { getCurrentUser } from './util/ApiUtils';
-import { Route, Switch, withRouter } from 'react-router-dom';
-import Login from './user/login/Login';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
+import Login from './pages/login/Login';
 import { Home } from './Home';
 import { notification } from 'antd';
 import { ACCESS_TOKEN } from './constants';
-import IndexPage from './IndexPage'
+import IndexPage from './pages/landing'
 import PrivateRoute from './common/PrivateRoute';
-import Signup from './user/signup/Signup';
+import Signup from './pages/signup/Signup';
+import NotFound from './common/NotFound';
 
 class App extends Component {
   state = {
@@ -64,10 +65,17 @@ class App extends Component {
   render() {
     return (
       <Switch>
-        <Route exact path='/' render={() => <IndexPage authenticated={this.state.authenticated} />} />
+        <Route
+          exact path='/'
+          render={(props) =>
+            this.state.authenticated ?
+              <Redirect to='/home' {...props} /> : <IndexPage {...props} />
+          }
+        />
         <PrivateRoute path='/home' component={Home} authenticated={this.state.authenticated} onLogout={this.handleLogout} />
         <Route path='/login' render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
         <Route path='/signup' component={Signup} />
+        <Route component={NotFound} />
       </Switch>
     )
   }
