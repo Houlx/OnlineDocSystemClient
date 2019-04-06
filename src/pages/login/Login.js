@@ -17,8 +17,8 @@ class NormalLoginForm extends React.Component {
         login(loginRequest).then(res => {
           if (res.status === 200) {
             localStorage.setItem(ACCESS_TOKEN, res.data.accessToken)
+            console.log(localStorage.getItem(ACCESS_TOKEN))
             this.props.onLogin()
-            console.log(this.props)
             this.props.history.push('/')
           }
         }).catch(err => {

@@ -1,6 +1,11 @@
 import { ACCESS_TOKEN } from '../constants'
 import axios from '../axios-config'
 
+// if (localStorage.getItem(ACCESS_TOKEN)) {
+// axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN)
+// }
+// const axios = instance
+
 export const login = loginRequest => axios.post('/auth/signin', loginRequest)
 
 export const signUp = signUpRequest => axios.post('/auth/signup', signUpRequest)
@@ -12,10 +17,10 @@ export const checkEmailAvailability = email => axios.get('/user/checkEmailAvaila
 export const getCurrentUser = () => {
   if (!localStorage.getItem(ACCESS_TOKEN)) {
     return Promise.reject("No access token set")
-  } else {
+  }
+  else {
     axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN)
   }
-
   console.log(axios.defaults.headers)
   return axios.get('/user/me')
 }

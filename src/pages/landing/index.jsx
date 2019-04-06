@@ -2,7 +2,6 @@
 /* eslint arrow-parens: 0 */
 import React from 'react';
 import { enquireScreen } from 'enquire-js';
-import { Redirect } from 'react-router-dom'
 
 import Banner0 from './Banner0';
 import Footer0 from './Footer0';
