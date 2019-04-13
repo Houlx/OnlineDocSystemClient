@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { getCurrentUser } from './util/ApiUtils';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import Login from './pages/login/Login';
-import { Home } from './Home';
+import Home from './Home';
 import { notification } from 'antd';
 import { ACCESS_TOKEN } from './constants';
 import IndexPage from './pages/landing'
@@ -68,11 +68,11 @@ class App extends Component {
         <Route
           exact path='/'
           render={(props) =>
-            this.state.authenticated ?
-              <Redirect to='/home' {...props} /> : <IndexPage {...props} />
+            this.state.authenticated && this.state.currentUser ?
+              <Redirect to={'/files/' + this.state.currentUser.id} {...props} /> : <IndexPage {...props} />
           }
         />
-        <PrivateRoute path='/home' component={Home} authenticated={this.state.authenticated} onLogout={this.handleLogout} currentUser={this.state.currentUser} />
+        <PrivateRoute path='/files/:id' component={Home} authenticated={this.state.authenticated} onLogout={this.handleLogout} currentUser={this.state.currentUser} />
         <Route path='/login' render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
         <Route path='/signup' component={Signup} />
         <Route component={NotFound} />

@@ -19,7 +19,7 @@ class NormalLoginForm extends React.Component {
             localStorage.setItem(ACCESS_TOKEN, res.data.accessToken)
             console.log(localStorage.getItem(ACCESS_TOKEN))
             this.props.onLogin()
-            this.props.history.push('/')
+            // this.props.history.push('/')
           }
         }).catch(err => {
           if (err.response.status === 401) {
