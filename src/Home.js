@@ -75,7 +75,7 @@ class Home extends Component {
   }
 
   handleDelete = id => {
-    deleteFile(id).then(_ => {
+    deleteFile(id).then(res => {
       this.loadFileList()
     })
   }
