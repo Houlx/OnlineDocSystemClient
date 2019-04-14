@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { FILE_LIST_SIZE } from './constants';
-import { getUserFiles, downloadFile } from './util/ApiUtils';
+import { getUserFiles, downloadFile, deleteFile } from './util/ApiUtils';
 import {
   Upload, Button, Icon, message,
 } from 'antd';
@@ -61,16 +61,22 @@ class Home extends Component {
         uploadFile: null,
         uploading: false,
       })
+      message.success('Successfully Uploaded')
     }).catch(err => {
+      if (err.response.status === 500) {
+        message.error('File Already Exists!')
+      }
       this.setState({ uploading: false })
     })
   }
 
-  handleDownload = id => {
-    downloadFile(id).then(res => {
-      console.log(res)
-    }).catch(err => {
-      console.log(err)
+  handleDownload = (id, name) => {
+    downloadFile(id, name)
+  }
+
+  handleDelete = id => {
+    deleteFile(id).then(_ => {
+      this.loadFileList()
     })
   }
 
@@ -80,7 +86,7 @@ class Home extends Component {
 
   render() {
     const fileList = this.state.files.map(file => (
-      <File key={file.id} fileInfo={file} onDownload={this.handleDownload} />
+      <File key={file.id} fileInfo={file} onDownload={this.handleDownload} onDelete={this.handleDelete} />
     ))
 
     const { uploadFile } = this.state
@@ -92,7 +98,7 @@ class Home extends Component {
         this.setState(prevState => prevState.uploadFile ? null : { uploadFile: file })
         return false
       },
-      uploadFile
+      uploadFile,
     }
 
 
@@ -108,6 +114,7 @@ class Home extends Component {
             type='primary'
             onClick={this.handleUpload}
             loading={this.state.uploading}
+            disabled={!this.state.uploadFile}
             style={{ marginTop: 16 }}
           >
             {this.state.uploading ? 'Uploading' : 'Start Upload'}
@@ -122,7 +129,8 @@ class Home extends Component {
 
 const File = (props) => (
   <div>
-    {props.fileInfo.id} {props.fileInfo.name} {props.fileInfo.size} {props.fileInfo.createdAt} <button onClick={() => props.onDownload(props.fileInfo.id)}>download</button>
+    {props.fileInfo.id} {props.fileInfo.name} {props.fileInfo.size} {props.fileInfo.createdAt} <button onClick={() => props.onDownload(props.fileInfo.id, props.fileInfo.name)}>download</button>
+    <button onClick={() => props.onDelete(props.fileInfo.id)}>delete</button>
   </div>
 )
 

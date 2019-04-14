@@ -1,6 +1,7 @@
 import { ACCESS_TOKEN, FILE_LIST_SIZE } from '../constants'
 import axios from '../axios'
 
+
 export const login = loginRequest => axios.post('/auth/signin', loginRequest)
 
 export const signUp = signUpRequest => axios.post('/auth/signup', signUpRequest)
@@ -24,4 +25,31 @@ export const getUserFiles = (page, size) => {
   return localStorage.getItem(ACCESS_TOKEN) ? axios.get('/files?page=' + page + '&size=' + size) : Promise.reject('No access token set')
 }
 
-export const downloadFile = id => axios.get('/files/download/' + id) //FIXME 
+const apiDownloadFile = (id) => axios({
+  url: '/files/download/' + id,
+  method: 'GET',
+  responseType: 'blob',
+})
+
+export const downloadFile = (id, name) => {
+  apiDownloadFile(id).then(res => {
+    if (res.headers['content-type'] !== 'application/json') {
+      let blob = new Blob([res.data])
+      if (window.navigator.msSaveOrOpenBlob) {
+        navigator.msSaveBlob(blob, name);
+      } else {
+        let link = document.createElement("a");
+        let evt = document.createEvent("HTMLEvents");
+        evt.initEvent("click", false, false);
+        link.href = URL.createObjectURL(blob);
+        link.download = name;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+      }
+    }
+  })
+}
+
+export const deleteFile = id => axios.delete('/files/' + id)
