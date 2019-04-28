@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { ACCESS_TOKEN } from './constants';
+import { ACCESS_TOKEN, API_BASE_URL } from './constants';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:9090/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

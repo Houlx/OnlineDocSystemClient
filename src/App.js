@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { getCurrentUser } from './util/ApiUtils';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import Login from './pages/login/Login';
-import Home from './Home';
+import Home from './pages/home/Home';
 import { notification } from 'antd';
 import { ACCESS_TOKEN } from './constants';
 import IndexPage from './pages/landing'

@@ -5,7 +5,6 @@ import {
 } from 'react-router-dom'
 
 export default ({ component: Component, authenticated, ...rest }) => {
-  console.log(authenticated)
   return (
     <Route
       {...rest}

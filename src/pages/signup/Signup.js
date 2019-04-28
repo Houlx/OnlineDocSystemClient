@@ -65,13 +65,13 @@ class Signup extends Component {
     signUp(signupRequest)
       .then(response => {
         notification.success({
-          message: 'Polling App',
+          message: 'Sign Up',
           description: "Thank you! You're successfully registered. Please Login to continue!",
         });
         this.props.history.push("/login");
       }).catch(error => {
         notification.error({
-          message: 'Polling App',
+          message: 'Sign Up',
           description: error.message || 'Sorry! Something went wrong. Please try again!'
         });
       });
@@ -81,7 +81,8 @@ class Signup extends Component {
     return !(this.state.name.validateStatus === 'success' &&
       this.state.username.validateStatus === 'success' &&
       this.state.email.validateStatus === 'success' &&
-      this.state.password.validateStatus === 'success'
+      this.state.password.validateStatus === 'success' &&
+      this.state.confirm.validateStatus === 'success'
     );
   }
 
