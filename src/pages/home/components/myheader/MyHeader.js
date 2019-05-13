@@ -1,8 +1,9 @@
 import React from 'react'
-import { Layout, Icon, Upload, Button, Menu, Dropdown } from 'antd';
+import { Layout, Icon, Upload, Button, Menu, Dropdown, Progress } from 'antd';
 import { Link, withRouter } from 'react-router-dom/cjs/react-router-dom.min'
 import { API_BASE_URL, ACCESS_TOKEN } from '../../../../constants'
 import './MyHeader.css'
+import { fileSizeFormat } from '../../../../util/FileUtil'
 
 const { Header } = Layout
 
@@ -62,6 +63,12 @@ class MyHeader extends React.Component {
 }
 
 const ProfileDropdownMenu = (props) => {
+  const storageUse = props.currentUser ?
+    fileSizeFormat(props.currentUser.alreadyUsedRoom)
+    + '/'
+    + fileSizeFormat(props.currentUser.storageRoom) : null
+  const percentage = props.currentUser ? props.currentUser.alreadyUsedRoom / props.currentUser.storageRoom * 100 : null
+
   const dropDownMenu = (
     <Menu onClick={props.handleMenuClick} className="profile-dropdown-menu">
       <Menu.Item key="user-info" className="dropdown-item" disabled>
@@ -71,6 +78,11 @@ const ProfileDropdownMenu = (props) => {
         <div className="username-info">
           @{props.currentUser ? props.currentUser.username : null}
         </div>
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key='storage' disabled>
+        <div className='user-full-name-info'>{storageUse}</div>
+        <Progress percent={percentage} showInfo={false} />
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="logout" className="dropdown-item">

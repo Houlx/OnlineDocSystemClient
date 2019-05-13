@@ -265,7 +265,7 @@ class Home extends Component {
   handleDelete = id => {
     deleteFile(id).then(res => {
       this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
-    })
+    }).then(_ => { this.props.onLoadUser() })
   }
 
   componentDidMount() {
@@ -279,6 +279,7 @@ class Home extends Component {
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
       this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
+      this.props.onLoadUser()
     } else if (info.file.status === 'error') {
       if (info.file.error.status === 500) {
         message.error(`${info.file.name} already exists.`)
@@ -367,6 +368,7 @@ class Home extends Component {
             onChange={this.handleUploadChange}
             onLogout={this.props.onLogout}
             currentUser={this.props.currentUser}
+            onLoadUser={this.props.onLoadUser}
           />
           <Content style={{
             margin: '16px 10px', background: '#fff', minHeight: 900

@@ -72,7 +72,7 @@ class App extends Component {
               <Redirect to={'/files/' + this.state.currentUser.id} {...props} /> : <IndexPage {...props} />
           }
         />
-        <PrivateRoute path='/files/:id' component={Home} authenticated={this.state.authenticated} onLogout={this.handleLogout} currentUser={this.state.currentUser} />
+        <PrivateRoute path='/files/:id' component={Home} authenticated={this.state.authenticated} onLogout={this.handleLogout} currentUser={this.state.currentUser} onLoadUser={this.loadCurrentUser} />
         <Route path='/login' render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
         <Route path='/signup' component={Signup} />
         <Route component={NotFound} />
