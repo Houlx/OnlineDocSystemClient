@@ -11,7 +11,7 @@ export const checkEmailAvailability = email => axios.get('/user/checkEmailAvaila
 
 export const getCurrentUser = () => localStorage.getItem(ACCESS_TOKEN) ? axios.get('/user/me') : Promise.reject("No access token set")
 
-export const getUserProfile = username => axios.get('/admin/users/' + username)
+export const getUserProfile = () => axios.get('/user/me/profile')
 
 export const uploadFile = formData => axios.post('/files', formData, {
   headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8', }
