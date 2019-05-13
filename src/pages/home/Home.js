@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { FILE_LIST_SIZE, PREVIEW_SERVICE_URL, FILE_RESOURCE_URL } from '../../constants';
 import { getUserFiles, downloadFile, deleteFile, rename, } from '../../util/ApiUtils';
 import {
-  Button, message, Layout, Table, Divider, Input, Form, Popconfirm, Pagination,
+  Button, message, Layout, Table, Divider, Input, Form, Popconfirm, Pagination, Icon,
 } from 'antd';
 import './Home.css'
 import { fileSizeFormat } from '../../util/FileUtil';
@@ -11,6 +11,7 @@ import MyHeader from './components/myheader/MyHeader'
 import { FileType } from "../../constants";
 import { withRouter } from "react-router-dom";
 import SiderMenu from './components/SiderMenu';
+import Highlighter from 'react-highlight-words'
 
 const { Sider, Content } = Layout
 const FormItem = Form.Item
@@ -113,6 +114,81 @@ class Home extends Component {
     last: true,
     collapsed: false,
     menuIndex: '0',
+    searchText: '',
+  }
+
+  getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys, selectedKeys, confirm, clearFilters,
+    }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            ref={node => { this.searchInput = node; }}
+            placeholder={`Search ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => this.handleSearch(selectedKeys, confirm)}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => this.handleSearch(selectedKeys, confirm)}
+            icon="search"
+            size="small"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => this.handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+        </div>
+      ),
+    filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#1890ff' : undefined }} />,
+    onFilter: (value, record) => record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownVisibleChange: (visible) => {
+      if (visible) {
+        setTimeout(() => this.searchInput.select());
+      }
+    },
+    render: (text) => (
+      <Highlighter
+        highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+        searchWords={[this.state.searchText]}
+        autoEscape
+        textToHighlight={text.toString()}
+      />
+    ),
+  })
+
+  handleSearch = (selectedKeys, confirm) => {
+    confirm();
+    this.setState({ searchText: selectedKeys[0] });
+  }
+
+  handleReset = (clearFilters) => {
+    clearFilters();
+    this.setState({ searchText: '' });
+  }
+
+
+  handlePreview = item => {
+    const fileName = item.name + '.' + item.ext
+    if (item.type === FileType.PDF) {
+      window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
+    } else {
+      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
+    }
+  }
+
+  toggle = () => {
+    this.setState({
+      collapsed: !this.state.collapsed,
+    });
   }
 
   columns = [{
@@ -121,6 +197,7 @@ class Home extends Component {
     key: 'name',
     editable: true,
     width: 420,
+    ...this.getColumnSearchProps('name')
   }, {
     title: 'Ext',
     dataIndex: 'ext',
@@ -151,21 +228,6 @@ class Home extends Component {
       </span>
     )
   }]
-
-  handlePreview = item => {
-    const fileName = item.name + '.' + item.ext
-    if (item.type === FileType.PDF) {
-      window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
-    } else {
-      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
-    }
-  }
-
-  toggle = () => {
-    this.setState({
-      collapsed: !this.state.collapsed,
-    });
-  }
 
   loadFileList = (page = 0, size = FILE_LIST_SIZE, typeId) => {
     let promise = getUserFiles(page, size, typeId)
