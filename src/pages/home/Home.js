@@ -1,18 +1,106 @@
 import React, { Component } from 'react'
-import { FILE_LIST_SIZE, API_BASE_URL, ACCESS_TOKEN, PREVIEW_SERVICE_URL, FILE_RESOURCE_URL } from '../../constants';
-import { getUserFiles, downloadFile, deleteFile, } from '../../util/ApiUtils';
+import { FILE_LIST_SIZE, PREVIEW_SERVICE_URL, FILE_RESOURCE_URL } from '../../constants';
+import { getUserFiles, downloadFile, deleteFile, rename, } from '../../util/ApiUtils';
 import {
-  Button, Icon, message, Layout, Menu, Table, Divider,
+  Button, message, Layout, Table, Divider, Input, Form, Popconfirm, Pagination,
 } from 'antd';
-import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 import './Home.css'
 import { fileSizeFormat } from '../../util/FileUtil';
 import Logo from './components/Logo'
-import MyHeader from './components/MyHeader'
+import MyHeader from './components/myheader/MyHeader'
 import { FileType } from "../../constants";
 import { withRouter } from "react-router-dom";
+import SiderMenu from './components/SiderMenu';
 
 const { Sider, Content } = Layout
+const FormItem = Form.Item
+
+const EditableContext = React.createContext()
+
+const EditableRow = ({ form, index, ...props }) => (
+  <EditableContext.Provider value={form}>
+    <tr {...props} />
+  </EditableContext.Provider>
+)
+
+const EditableFormRow = Form.create()(EditableRow);
+
+class EditableCell extends React.Component {
+  state = {
+    editing: false,
+  }
+
+  toggleEdit = () => {
+    const editing = !this.state.editing;
+    this.setState({ editing }, () => {
+      if (editing) {
+        this.input.focus();
+      }
+    });
+  }
+
+  save = (e) => {
+    const { record, handleSave } = this.props;
+    this.form.validateFields((error, values) => {
+      if (error && error[e.currentTarget.id]) {
+        return;
+      }
+      this.toggleEdit();
+      handleSave({ ...record, ...values });
+    });
+  }
+
+  render() {
+    const { editing } = this.state;
+    const {
+      editable,
+      dataIndex,
+      title,
+      record,
+      index,
+      handleSave,
+      ...restProps
+    } = this.props;
+    return (
+      <td {...restProps}>
+        {editable ? (
+          <EditableContext.Consumer>
+            {(form) => {
+              this.form = form;
+              return (
+                editing ? (
+                  <FormItem style={{ margin: 0 }}>
+                    {form.getFieldDecorator(dataIndex, {
+                      rules: [{
+                        required: true,
+                        message: `${title} is required.`,
+                      }],
+                      initialValue: record[dataIndex],
+                    })(
+                      <Input
+                        ref={node => (this.input = node)}
+                        onPressEnter={this.save}
+                        onBlur={this.save}
+                      />
+                    )}
+                  </FormItem>
+                ) : (
+                    <div
+                      className="editable-cell-value-wrap"
+                      style={{ paddingRight: 24 }}
+                      onClick={this.toggleEdit}
+                    >
+                      {restProps.children}
+                    </div>
+                  )
+              );
+            }}
+          </EditableContext.Consumer>
+        ) : restProps.children}
+      </td>
+    );
+  }
+}
 
 class Home extends Component {
   state = {
@@ -24,15 +112,52 @@ class Home extends Component {
     totalPages: 0,
     last: true,
     collapsed: false,
+    menuIndex: '0',
   }
 
+  columns = [{
+    title: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+    editable: true,
+    width: 420,
+  }, {
+    title: 'Ext',
+    dataIndex: 'ext',
+    key: 'ext',
+    width: 160,
+  }, {
+    title: 'Size',
+    dataIndex: 'size',
+    key: 'size',
+    width: 160,
+  }, {
+    title: 'Created At',
+    dataIndex: 'createdAt',
+    key: 'createdAt',
+    width: 240,
+  }, {
+    title: 'Action',
+    key: 'action',
+    render: (text, record) => (
+      <span>
+        <Button type="primary" shape="circle" icon="download" size={"default"} onClick={() => this.handleDownload(record.key, record.name + '.' + record.ext.toLowerCase())} />
+        <Divider type='vertical' />
+        <Button shape="circle" icon="eye" size={"default"} onClick={() => this.handlePreview(record)} />
+        <Divider type='vertical' />
+        <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
+          <Button type="danger" shape="circle" icon="delete" size={"default"} />
+        </Popconfirm>
+      </span>
+    )
+  }]
+
   handlePreview = item => {
+    const fileName = item.name + '.' + item.ext
     if (item.type === FileType.PDF) {
-      window.open(FILE_RESOURCE_URL + item.createdBy + '/' + item.name, '_blank').focus()
-      // window.location.href = FILE_RESOURCE_URL + item.createdBy + '/' + item.name
+      window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
     } else {
-      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + item.createdBy + '/' + item.name, '_blank').focus()
-      // window.location.href = PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + item.createdBy + '/' + item.name
+      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
     }
   }
 
@@ -42,8 +167,8 @@ class Home extends Component {
     });
   }
 
-  loadFileList = (page = 0, size = FILE_LIST_SIZE) => {
-    let promise = getUserFiles(page, size)
+  loadFileList = (page = 0, size = FILE_LIST_SIZE, typeId) => {
+    let promise = getUserFiles(page, size, typeId)
     if (!promise) {
       return
     }
@@ -77,21 +202,21 @@ class Home extends Component {
 
   handleDelete = id => {
     deleteFile(id).then(res => {
-      this.loadFileList()
+      this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
     })
   }
 
   componentDidMount() {
-    this.loadFileList()
+    this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
   }
 
-  handleChange = info => {
+  handleUploadChange = info => {
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
-      this.loadFileList()
+      this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
     } else if (info.file.status === 'error') {
       if (info.file.error.status === 500) {
         message.error(`${info.file.name} already exists.`)
@@ -103,115 +228,90 @@ class Home extends Component {
 
   handleMenuClick = e => {
     console.log(e)
+    this.loadFileList(0, FILE_LIST_SIZE, e.key)
+    this.setState({ menuIndex: e.key })
+  }
+
+  handleSave = (row) => {
+    console.log(row)
+    const file = this.state.files.find(file => row.key === file.id)
+    if (file.name.toLowerCase() !== row.name + '.' + row.ext.toLowerCase()) {
+      rename(row.key, row.name).then(res => {
+        this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
+      })
+    }
+  }
+
+  handlePageChange = (page) => {
+    console.log(page)
+    // this.setState({ page: page })
+    this.loadFileList(page - 1, FILE_LIST_SIZE, this.state.menuIndex)
+    this.setState({ page: page - 1 })
   }
 
   render() {
     const fileList = this.state.files.map(file => {
       return {
         key: file.id,
-        name: file.name,
+        name: file.name.substring(0, file.name.lastIndexOf('.')),
         size: fileSizeFormat(file.size),
         type: file.type,
+        ext: file.name.substring(file.name.lastIndexOf('.') + 1).toUpperCase(),
         createdAt: file.createdAt,
-        createdBy: file.createdBy.id,
       }
     })
 
-    const props = {
-      name: 'file',
-      action: API_BASE_URL + '/files',
-      headers: {
-        authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN)
+    const components = {
+      body: {
+        row: EditableFormRow,
+        cell: EditableCell,
       },
-      showUploadList: false,
-    }
+    };
 
-    const columns = [{
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      render: (fileName, record) => {
-        return (
-          <div>
-            <Link onClick={() => this.handlePreview(record)}>{fileName}</Link>
-          </div>
-        )
+    const columns = this.columns.map(col => {
+      if (!col.editable) {
+        return col
       }
-    }, {
-      title: 'Size',
-      dataIndex: 'size',
-      key: 'size',
-    }, {
-      title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-    }, {
-      title: 'Action',
-      key: 'action',
-      render: (text, record) => (
-        <span>
-          <Button type='primary' icon='download' onClick={() => this.handleDownload(record.key, record.name)}>Download</Button>
-          <Divider type='vertical' />
-          <Button>Rename</Button>
-          <Divider type='vertical' />
-          <Button onClick={() => this.handleDelete(record.key)} type='danger'>Delete</Button>
-        </span>
-      )
-    }]
+      return {
+        ...col,
+        onCell: record => ({
+          record,
+          editable: col.editable,
+          dataIndex: col.dataIndex,
+          title: col.title,
+          handleSave: this.handleSave,
+        }),
+      }
+    })
+
+    console.log(this.state.totalPages)
 
     return (
       <Layout className='layout'>
         <Sider
+          className='app-sider'
           theme="light"
           trigger={null}
           collapsible
           collapsed={this.state.collapsed}
         >
-          <Logo />
-          <Menu theme="light" mode="inline" defaultSelectedKeys={['0']} onClick={this.handleMenuClick}>
-            <Menu.Item key="0">
-              <Icon type="file" />
-              <span>All</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.TXT}>
-              <Icon type="file-text" />
-              <span>TXT</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.DOC}>
-              <Icon type="file-word" />
-              <span>Word</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.PPT}>
-              <Icon type="file-ppt" />
-              <span>PowerPoint</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.XLS}>
-              <Icon type="file-excel" />
-              <span>Excel</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.PDF}>
-              <Icon type="file-pdf" />
-              <span>PDF</span>
-            </Menu.Item>
-            <Menu.Item key={FileType.OTHER}>
-              <Icon type="file-unknown" />
-              <span>Others</span>
-            </Menu.Item>
-          </Menu>
+          <Logo display={this.state.collapsed} />
+          <SiderMenu onClick={this.handleMenuClick} />
         </Sider>
-        <Layout>
+        <Layout className='app-container'>
           <MyHeader
             collapsed={this.state.collapsed}
             onToggle={this.toggle}
-            onChange={this.handleChange}
+            onChange={this.handleUploadChange}
             onLogout={this.props.onLogout}
-            uploadProps={{ ...props }}
+            currentUser={this.props.currentUser}
           />
           <Content style={{
-            margin: '16px 10px', background: '#fff', minHeight: 900,
+            margin: '16px 10px', background: '#fff', minHeight: 900
           }}
           >
-            <Table columns={columns} dataSource={fileList} />
+            <Pagination style={{ padding: 10, }} current={this.state.page + 1} onChange={this.handlePageChange} total={this.state.totalPages * 10} />
+            <Table components={components} columns={columns} dataSource={fileList} rowClassName={() => 'editable-row'} pagination={false} />
           </Content>
         </Layout>
       </Layout>

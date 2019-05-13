@@ -11,17 +11,17 @@ export const checkEmailAvailability = email => axios.get('/user/checkEmailAvaila
 
 export const getCurrentUser = () => localStorage.getItem(ACCESS_TOKEN) ? axios.get('/user/me') : Promise.reject("No access token set")
 
-export const getUserProfile = username => axios.get('/users/' + username)
+export const getUserProfile = username => axios.get('/admin/users/' + username)
 
 export const uploadFile = formData => axios.post('/files', formData, {
   headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8', }
 })
 
-export const getUserFiles = (page, size) => {
+export const getUserFiles = (page, size, typeId) => {
   page = page || 0
   size = size || FILE_LIST_SIZE
 
-  return localStorage.getItem(ACCESS_TOKEN) ? axios.get('/files?page=' + page + '&size=' + size) : Promise.reject('No access token set')
+  return localStorage.getItem(ACCESS_TOKEN) ? axios.get('/files/' + typeId + '?page=' + page + '&size=' + size) : Promise.reject('No access token set')
 }
 
 export const apiDownloadFile = (id) => axios({
@@ -53,3 +53,5 @@ export const downloadFile = (id, name) => {
 }
 
 export const deleteFile = id => axios.delete('/files/' + id)
+
+export const rename = (id, newName) => axios.post('/files/' + id + '?newName=' + newName)

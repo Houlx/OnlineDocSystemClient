@@ -1,14 +1,3 @@
-.trigger {
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 24px;
-  cursor: pointer;
-  transition: color .3s;
-}
-
-.trigger:hover {
-  color: #1890ff;
-}
 
 .logo {
   height: 32px;
@@ -19,4 +8,9 @@
 .layout {
   height: 100%;
   width: 100%;
+}
+
+.app-sider {
+  box-shadow: 8px 0px 8px #f0f1f2;
+  z-index: 10;
 }

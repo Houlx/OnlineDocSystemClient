@@ -22,6 +22,7 @@ class NormalLoginForm extends React.Component {
             // this.props.history.push('/')
           }
         }).catch(err => {
+          console.log(err.response)
           if (err.response.status === 401) {
             notification.error({
               message: "Login Failed",
