@@ -197,7 +197,13 @@ class Home extends Component {
     key: 'name',
     editable: true,
     width: 420,
-    ...this.getColumnSearchProps('name')
+    ...this.getColumnSearchProps('name'),
+    render: (text, record) => (
+      <span>
+        <Icon type='edit' />
+        {text}
+      </span>
+    )
   }, {
     title: 'Ext',
     dataIndex: 'ext',
@@ -212,6 +218,11 @@ class Home extends Component {
     title: 'Created At',
     dataIndex: 'createdAt',
     key: 'createdAt',
+    width: 240,
+  }, {
+    title: 'Updated At',
+    dataIndex: 'updatedAt',
+    key: 'updatedAt',
     width: 240,
   }, {
     title: 'Action',
@@ -298,7 +309,7 @@ class Home extends Component {
   handleSave = (row) => {
     console.log(row)
     const file = this.state.files.find(file => row.key === file.id)
-    if (file.name.toLowerCase() !== row.name + '.' + row.ext.toLowerCase()) {
+    if (file.name.substring(0, file.name.lastIndexOf('.')) !== row.name) {
       rename(row.key, row.name).then(res => {
         this.loadFileList(0, FILE_LIST_SIZE, this.state.menuIndex)
       })
@@ -321,6 +332,7 @@ class Home extends Component {
         type: file.type,
         ext: file.name.substring(file.name.lastIndexOf('.') + 1).toUpperCase(),
         createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
       }
     })
 
