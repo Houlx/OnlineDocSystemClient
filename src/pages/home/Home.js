@@ -12,6 +12,7 @@ import { FileType } from "../../constants";
 import { withRouter } from "react-router-dom";
 import SiderMenu from './components/SiderMenu';
 import Highlighter from 'react-highlight-words'
+import pinyin from 'pinyin';
 
 const { Sider, Content } = Layout
 const FormItem = Form.Item
@@ -113,7 +114,7 @@ class Home extends Component {
     totalPages: 0,
     last: true,
     collapsed: false,
-    menuIndex: '0',
+    menuIndex: 0,
     searchText: '',
   }
 
@@ -177,11 +178,11 @@ class Home extends Component {
 
 
   handlePreview = item => {
-    const fileName = item.name + '.' + item.ext
     if (item.type === FileType.PDF) {
-      window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
+      // window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
+      window.open(FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName, '_blank').focus()
     } else {
-      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
+      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName, '_blank').focus()
     }
   }
 
@@ -203,7 +204,10 @@ class Home extends Component {
         <Icon type='edit' />
         {text}
       </span>
-    )
+    ),
+    defaultSortOrder: 'ascend',
+    sorter: (a, b) => pinyin.compare(a.name, b.name),
+    sortDirections: ['descend', 'ascend'],
   }, {
     title: 'Ext',
     dataIndex: 'ext',
@@ -333,6 +337,9 @@ class Home extends Component {
         ext: file.name.substring(file.name.lastIndexOf('.') + 1).toUpperCase(),
         createdAt: file.createdAt,
         updatedAt: file.updatedAt,
+        groupName: file.groupName,
+        remoteFileName: file.remoteFileName,
+        pinyin: pinyin(this.name),
       }
     })
 

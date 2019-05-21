@@ -6,6 +6,7 @@
     "antd": "^3.16.2",
     "axios": "^0.18.0",
     "enquire-js": "^0.2.1",
+    "pinyin": "^2.9.0",
     "rc-queue-anim": "^1.6.12",
     "rc-scroll-anim": "^2.5.7",
     "react": "^16.8.6",

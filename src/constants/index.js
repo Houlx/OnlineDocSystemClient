@@ -1,7 +1,7 @@
 export const API_BASE_URL = 'http://localhost:9090/api' //TODO this need to be changed while deploying
 export const ACCESS_TOKEN = 'ACCESS_TOKEN'
 
-export const FILE_RESOURCE_URL = 'http://localhost:9090/resource/'
+export const FILE_RESOURCE_URL = 'http://39.96.211.100:9009/'
 export const PREVIEW_SERVICE_URL = 'http://39.96.211.100:8012/onlinePreview?url='
 
 export const NAME_MIN_LEN = 4
