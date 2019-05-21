@@ -55,3 +55,5 @@ export const downloadFile = (id, name) => {
 export const deleteFile = id => axios.delete('/files/' + id)
 
 export const rename = (id, newName) => axios.post('/files/' + id + '?newName=' + newName)
+
+export const getFileToken = remoteFileName => axios.get('/files/preview?remoteFileName=' + remoteFileName)

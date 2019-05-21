@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { FILE_LIST_SIZE, PREVIEW_SERVICE_URL, FILE_RESOURCE_URL } from '../../constants';
-import { getUserFiles, downloadFile, deleteFile, rename, } from '../../util/ApiUtils';
+import { getUserFiles, downloadFile, deleteFile, rename, getFileToken } from '../../util/ApiUtils';
 import {
   Button, message, Layout, Table, Divider, Input, Form, Popconfirm, Pagination, Icon,
 } from 'antd';
@@ -179,10 +179,13 @@ class Home extends Component {
 
   handlePreview = item => {
     if (item.type === FileType.PDF) {
-      // window.open(FILE_RESOURCE_URL + this.props.currentUser.id + '/' + fileName, '_blank').focus()
-      window.open(FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName, '_blank').focus()
+      getFileToken(item.remoteFileName).then(res => {
+        window.open(FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName + '?' + res.data)
+      })
     } else {
-      window.open(PREVIEW_SERVICE_URL + FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName, '_blank').focus()
+      getFileToken(item.remoteFileName).then(res => {
+        window.open(PREVIEW_SERVICE_URL + encodeURIComponent(FILE_RESOURCE_URL + item.groupName + '/' + item.remoteFileName + '?' + res.data))
+      })
     }
   }
 
