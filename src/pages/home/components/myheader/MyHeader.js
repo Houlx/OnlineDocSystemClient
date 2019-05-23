@@ -1,6 +1,6 @@
 import React from 'react'
 import { Layout, Icon, Upload, Button, Menu, Dropdown, Progress } from 'antd';
-import { Link, withRouter } from 'react-router-dom/cjs/react-router-dom.min'
+import { Link, withRouter } from 'react-router-dom'
 import { API_BASE_URL, ACCESS_TOKEN } from '../../../../constants'
 import './MyHeader.css'
 import { fileSizeFormat } from '../../../../util/FileUtil'
