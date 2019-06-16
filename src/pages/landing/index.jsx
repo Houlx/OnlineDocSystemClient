@@ -9,7 +9,7 @@ import Footer0 from './Footer0';
 import { Banner00DataSource, Footer00DataSource } from './data.source';
 import './less/antMotionStyle.less';
 
-import '../../assets/storage.png'
+// import '../../assets/storage.png'
 
 let isMobile;
 enquireScreen((b) => {

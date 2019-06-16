@@ -5,7 +5,7 @@ import {
 import './Login.css'
 import { login } from '../../util/ApiUtils';
 import { ACCESS_TOKEN } from '../../constants';
-import { Link } from 'react-router-dom/cjs/react-router-dom';
+import { Link } from 'react-router-dom';
 
 class NormalLoginForm extends React.Component {
 
@@ -22,6 +22,7 @@ class NormalLoginForm extends React.Component {
             // this.props.history.push('/')
           }
         }).catch(err => {
+          console.log(err.response)
           if (err.response.status === 401) {
             notification.error({
               message: "Login Failed",
