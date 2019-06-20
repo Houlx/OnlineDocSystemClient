@@ -1,6 +1,6 @@
 # Online Document Management System [Frontend]
 
-for backend, see [OnlineDocSystem](https://github.com/Houlx/OnlineDocSystem).
+For backend, see [OnlineDocSystem](https://github.com/Houlx/OnlineDocSystem).
 
 ## Getting Started
 
